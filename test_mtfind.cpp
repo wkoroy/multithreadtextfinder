@@ -77,13 +77,24 @@ void gen_file( map <pair<size_t , size_t>, pos_string> &d_sourse)
         {
             string ins_words = fnded_tword;
             string rnds = random_string(distribution(generator));
+            string rnd2 = random_string(distribution(generator));
             if (count(str_words.begin(), str_words.end(), i) == 0)
                 ins_words = "";
             else
             {
+                size_t ins_pos = rnds.length();
+                
                 d_sourse[make_pair(i, rnds.length()) ]  =  (pos_string){rnds.length() , fnded_tword } ;
-            }
-            strfile <<rnds  << ins_words << random_string(distribution(generator)) << endl;
+
+                if (i % 2 == 0)
+                {
+                    d_sourse[make_pair(i, rnds.length()+ins_words.length() ) ]  =  (pos_string){ rnds.length()+ins_words.length()  , fnded_tword } ;
+                    ins_words += ins_words;
+                }
+                
+           }
+            strfile <<rnds  << ins_words << rnd2 << endl;
+            ins_words = "";
         }
     }
 
