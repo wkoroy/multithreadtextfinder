@@ -62,7 +62,7 @@ void randomise_test_params()
 /**
  * сгенерировать файл для поиска
 */
-void gen_file( map <size_t, pos_string> &d_sourse)
+void gen_file( map <pair<size_t , size_t>, pos_string> &d_sourse)
 {
     ofstream strfile;
     strfile.open( file_path );
@@ -81,7 +81,7 @@ void gen_file( map <size_t, pos_string> &d_sourse)
                 ins_words = "";
             else
             {
-                d_sourse[i]  =  (pos_string){rnds.length() , fnded_tword } ;
+                d_sourse[make_pair(i, rnds.length()) ]  =  (pos_string){rnds.length() , fnded_tword } ;
             }
             strfile <<rnds  << ins_words << random_string(distribution(generator)) << endl;
         }
@@ -101,13 +101,13 @@ int main(int argc, char **argv)
     for (size_t i = 0; i < test_count; ++i)
     {
         cout << " TEST #" <<i<<endl;;
-        map<size_t, pos_string> d_sourse;
+        map< pair<size_t , size_t> , pos_string> d_sourse;
         gen_file(d_sourse);
 
         cout << " GENERATED DATA: \n";
         for (auto it : d_sourse)
         {
-            cout << it.first << " " << it.second.pos << " " << it.second.s << endl;
+            cout << it.first.first << " " << it.second.pos << " " << it.second.s << endl;
         }
         cout << " ------------- \n";
 
@@ -121,7 +121,7 @@ int main(int argc, char **argv)
         long count_ok = 0;
         for (auto &r : result)
         {
-            if (d_sourse[r.first] == r.second)
+            if (d_sourse[make_pair(r.first ,r.second.pos )] == r.second)
             {
                 cout << "OK " << r.first << " " << r.second.pos << " " << r.second.s << endl;
                 count_ok++;
