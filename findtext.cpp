@@ -13,6 +13,10 @@
 #include <array>
 #include "findtext.h"
 
+
+using proc_str_func_t = std::function<void(const pattern_string &ptrn, uint64_t line_number, const vector<string> &vstr ,  vector<pair<size_t, pos_string>> &result  )> ; 
+
+
 // g++  -o ./task1    ./task1.cpp    -std=c++14 -O3 -lpthread
 using namespace std;
 
@@ -109,12 +113,10 @@ string pattern_string::get_basic_word(size_t &offset) const
 /**
  * сбор массивов строк для последующей пердачи на обработку
 */
-bool string_processing_in_file(const pattern_string &str_pattern, ifstream &file, size_t limit, 
+bool string_processing_in_file(const pattern_string &str_pattern, ifstream &file, size_t limit,
 
-std::function<void(const pattern_string &ptrn, uint64_t line_number, const vector<string> &vstr ,  vector<pair<size_t, pos_string>> &result  )> proc_strings , 
-
- vector<pair<size_t, pos_string>> &result
- )
+                               proc_str_func_t proc_strings,
+                               vector<pair<size_t, pos_string>> &result)
 {
     bool switch_vectors = false;
     uint64_t line_counter = 1;
