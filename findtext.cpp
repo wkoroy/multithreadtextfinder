@@ -12,7 +12,7 @@
 #include <map>
 #include <array>
 #include "findtext.h"
-
+#include "data_distributor.h"
 
 using proc_str_func_t = std::function<void(const pattern_string &ptrn, uint64_t line_number, const vector<string> &vstr ,  vector<pair<size_t, pos_string>> &result  )> ; 
 
@@ -75,7 +75,7 @@ pattern_string::pattern_string(const string &ptrn)
     {
         if (basic_word.length() > word.first)
         {
-            cout << basic_word.length() << "  " << basic_word_offset << " - - |" << basic_word << "|" << endl;
+            //cout << basic_word.length() << "  " << basic_word_offset << " - - |" << basic_word << "|" << endl;
             word = make_pair(basic_word.length(), make_pair(basic_word_offset, basic_word));
         }
     }
