@@ -87,7 +87,7 @@ void distrib_string(ifstream &file , func_consumer consumer ,  size_t overlap = 
     vector<num_offset_str> lines;
     uint64_t linenum = 0;
     size_t accum_sz = 0;
-    constexpr size_t pcache_sz =  3072*1000;
+    constexpr size_t pcache_sz = 8;// 3072*1000;
     string str;
     bool read_res;
     while( !(read_res =std::getline(file, str).eof()) )
@@ -97,11 +97,10 @@ void distrib_string(ifstream &file , func_consumer consumer ,  size_t overlap = 
         if( (accum_sz+slen) < pcache_sz )
         {
              accum_sz+= slen;
-             lines.emplace_back( linenum , move(make_pair(0,str) ));
+             lines.emplace_back( linenum , move(make_pair(0,move(str)) ));
         }
         else
         {
-
             int64_t lef_to_full = (int64_t)pcache_sz -(int64_t) accum_sz;
             if(lef_to_full > 0) //  дополнить недостающее
             {
@@ -117,8 +116,12 @@ void distrib_string(ifstream &file , func_consumer consumer ,  size_t overlap = 
 
             for(auto i = line_parts.begin();i!=line_parts.end();++i)
             {
+                (*i).first +=lef_to_full; 
                 lines.emplace_back(linenum , move(*i));
             }
+
+             consumer(lines);
+            accum_sz = 0;
 
             //TODO массив lines  готов
 
@@ -142,10 +145,20 @@ void distrib_string(ifstream &file , func_consumer consumer ,  size_t overlap = 
 
 void distributor_func(  vector<num_offset_str> &lines)
 {
-
+    cout<<"--------\n";
+    size_t count_bytes = 0;
+   for(auto a:lines)
+   {
+       cout<<a.first<<" N "<<a.second.first <<"|"<< a.second.second<<endl;
+       count_bytes += a.second.second.size();
+   }
+    cout<<"["<<count_bytes <<"]"<<endl;
+   
 }
 int main(int argc, char **argv)
 {
+
+ #if 0   
    string  str1 = "";
    for(char a='a';a<='z';++a)
    {
@@ -200,9 +213,11 @@ int main(int argc, char **argv)
         file<<str<<endl;
         file.close();
     }
+#endif
+
 
     ifstream f;
-    f.open("./test.txt");
+    f.open("./test2.txt");
     distrib_string(f ,distributor_func, 4);
     return 0;
     //  gen_file();
