@@ -56,14 +56,17 @@ vector<ofsset_and_str>  div_str_overlap(const string &s,const int64_t  max_sz ,c
     vector<ofsset_and_str> vos;
     int64_t slen = s.length();
     int64_t left = slen - max_sz;
+ 
     if (left > 0)
     {
         int64_t lcnt = slen / max_sz;
         int64_t clen = slen;
+
         // не вместилось
         for (size_t i = 0; i < lcnt; i++)
         {
             clen -= max_sz;
+            if(clen>0)
             vos.emplace_back(make_pair(i * max_sz, s.substr(i * max_sz, max_sz)));
         }
         if (clen > 0)
@@ -81,7 +84,8 @@ vector<ofsset_and_str>  div_str_overlap(const string &s,const int64_t  max_sz ,c
     for(auto &v:vos)
     {
         v.second=str_overlap+v.second; //TODO  вставка  слишком медленно работает - переделать!!!
-        str_overlap = v.second.substr(v.second.size()-overlap+1);
+        if( (int64_t)v.second.size() > overlap  )
+          str_overlap = v.second.substr(v.second.size()-overlap+1);
     }
     return vos;
 }
@@ -100,44 +104,16 @@ void distrib_string(ifstream &file , func_consumer consumer ,const  size_t overl
     while( !(read_res =std::getline(file, str).eof()) )
     {
         auto slen = str.length();
-        if( (accum_sz+slen) < pcache_sz )
-        {
-             accum_sz+= slen;
-             lines.emplace_back( linenum , move(make_pair(0,move(str)) ));
-        }
-        else
-        {
-            int64_t lef_to_full = (int64_t)pcache_sz -(int64_t) accum_sz;
-            lef_to_full *= (lef_to_full > overlap) * (lef_to_full > 0);
 
-            if(lef_to_full > 0) //  дополнить недостающее
-            {
-                 // подсчет перекрытия
-                 size_t offs = overlap * (str.length()  > (lef_to_full+overlap) ) -1*(overlap>1);
-                 lines.emplace_back( linenum , move(make_pair(0,str.substr(0,lef_to_full+offs) ) ));
-            }
-
-
-            //consumer(lines);
-            //lines.clear();
-
-            auto line_parts = div_str_overlap( str.substr(lef_to_full) , pcache_sz+overlap , overlap );
-
-            for(auto i = line_parts.begin();i!=line_parts.end();++i)
-            {
-                (*i).first +=lef_to_full; 
-                lines.emplace_back(linenum , move(*i));
-            }
-
-              //  массив lines  готов
-             consumer(lines);
-
-             lines.clear();
-            accum_sz = 0;
-           
-        }
+         auto line_parts = div_str_overlap( str , pcache_sz , overlap );
+         vector <num_offset_str> lines;
+         for(auto i: line_parts)
+         {
+             lines.emplace_back( linenum ,    i);
+         }
+         consumer(lines);
+         lines.clear();
         
-       
         linenum++;
     }
 
@@ -156,7 +132,7 @@ void distributor_func(  vector<num_offset_str> &lines)
     size_t count_bytes = 0;
    for(auto a:lines)
    {
-       cout<<a.first<<" N "<<a.second.first <<"|"<< a.second.second<<endl;
+       cout<<a.first<<" N "<<a.second.first <<"|"<< a.second.second<<" = "<<  a.second.second.size()<<endl;
        count_bytes += a.second.second.size();
    }
     cout<<"["<<count_bytes <<"]"<<endl;
